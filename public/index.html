@@ -1,0 +1,793 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Personal Expense Tracker</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, rgba(240, 242, 245, 0.9), rgba(255, 255, 255, 0.9));
+            color: #2D3748;
+            margin: 0;
+            overflow-x: hidden;
+        }
+        .navbar {
+            background: #1F2A44;
+            padding: 1rem 2rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .navbar h1 {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #FFFFFF;
+        }
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+        }
+        .nav-links a {
+            color: #D1D5DB;
+            font-weight: 500;
+            font-size: 1rem;
+            transition: color 0.3s ease;
+        }
+        .nav-links a:hover {
+            color: #60A5FA;
+        }
+        .nav-links a.active {
+            color: #60A5FA;
+            border-bottom: 2px solid #60A5FA;
+        }
+        .mobile-menu-toggle {
+            display: none;
+            font-size: 1.75rem;
+            cursor: pointer;
+            color: #FFFFFF;
+        }
+        .main-content {
+            padding: 5rem 1.5rem 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 2rem;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 20px;
+            padding: 2.5rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+        }
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+        }
+        .card h2 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #2D3748;
+            margin-bottom: 1rem;
+            border-left: 4px solid rgba(59, 130, 246, 0.7);
+            padding-left: 1rem;
+        }
+        .form-label {
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #4A5568;
+            margin-bottom: 0.5rem;
+            opacity: 0.85;
+        }
+        input, select {
+            background: rgba(255, 255, 255, 0.2);
+            border-bottom: 1px solid rgba(209, 213, 219, 0.5);
+            outline: none;
+            padding: 0.85rem 1.25rem;
+            font-size: 0.9rem;
+            color: #2D3748;
+            width: 100%;
+            transition: border-color 0.3s ease, background 0.3s ease;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: rgba(59, 130, 246, 0.7);
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        button {
+            background: rgba(59, 130, 246, 1);
+            color: #FFFFFF;
+            font-weight: 600;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            transition: background 0.3s ease, transform 0.2s ease, box-shadow 0.3s ease;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        button:hover {
+            background: rgba(59, 130, 246, 1);
+            transform: scale(1.02);
+            box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
+        }
+        button.secondary {
+            background: rgba(255, 255, 255, 0.2);
+            color: #2D3748;
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            box-shadow: 0 2px 8px rgba(59, 130, 246, 0.2);
+        }
+        button.secondary:hover {
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+        table {
+            width: 100%;
+            border-collapse: separate;
+            border-spacing: 0;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+        table th {
+            background: rgba(31, 42, 68, 0.9);
+            color: #FFFFFF;
+            padding: 1.25rem;
+            font-weight: 500;
+            text-align: left;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        table td {
+            padding: 1.25rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            color: #2D3748;
+        }
+        table tr:hover {
+            background: rgba(255, 255, 255, 0.25);
+        }
+        #report-chart {
+            max-height: 400px;
+            background: rgba(255, 255, 255, 0.15);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 16px;
+            padding: 1.5rem;
+        }
+        .fade-in {
+            animation: fadeIn 0.6s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 64px;
+                left: 0;
+                right: 0;
+                background: #1F2A44;
+                padding: 1.5rem;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .nav-links.active {
+                display: flex;
+            }
+            .mobile-menu-toggle {
+                display: block;
+            }
+            .main-content {
+                padding: 5rem 1rem 1rem;
+            }
+            .card {
+                padding: 1.5rem;
+            }
+            .navbar h1 {
+                font-size: 1.5rem;
+            }
+            .table-container {
+                overflow-x: auto;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div class="navbar" id="navbar">
+        <h1>Expense Tracker</h1>
+        <span class="mobile-menu-toggle" id="mobile-menu-toggle" onclick="toggleNav()">☰</span>
+        <div class="nav-links" id="nav-links">
+            <a href="#app" onclick="showSection('app')">Dashboard</a>
+            <a href="#expenses" onclick="showSection('expenses')">Expenses</a>
+            <a href="#reports" onclick="showSection('reports')">Reports</a>
+            <a href="#profile" onclick="showSection('profile')">Profile</a>
+            <a href="#" onclick="logout()">Logout</a>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Auth Section -->
+         <br>
+        <div id="auth-section" class="card max-w-md mx-auto fade-in">
+            <h2>Welcome to Expense Tracker</h2>
+            <div id="login-form" class="">
+                <div class="space-y-6">
+                    <div>
+                        <label class="form-label">Email</label>
+                        <input type="email" id="login-email" placeholder="Enter your email" class="w-full" style="padding: 10px;">
+                    </div>
+                    <div>
+                        <label class="form-label">Password</label>
+                        <input type="password" id="login-password" placeholder="Enter your password" class="w-full" style="padding: 10px;">
+                    </div>
+                    <button onclick="login()" class="w-full" style=" background: rgba(59, 130, 246, 1); padding: 10px;">Sign In</button>
+                    <p class="text-center text-sm text-gray-700 opacity-80">No account? <a href="#" onclick="showRegister()" class="text-blue-500 hover:text-blue-600">Create one</a></p>
+                </div>
+            </div>
+            <div id="register-form" class="hidden">
+                <div class="space-y-6">
+                    <div>
+                        <label class="form-label">Email</label>
+                        <input type="email" id="register-email" placeholder="Enter your email" class="w-full" style="padding: 10px;">
+                    </div>
+                    <div>
+                        <label class="form-label">Password</label>
+                        <input type="password" id="register-password" placeholder="Enter your password" class="w-full" style="padding: 10px;">
+                    </div>
+                    <button onclick="register()" class="w-full" style=" background: rgba(59, 130, 246, 1); padding: 10px;">Sign Up</button>
+                    <p class="text-center text-sm text-gray-700 opacity-80">Already have an account? <a href="#" onclick="showLogin()" class="text-blue-500 hover:text-blue-600">Sign in</a></p>
+                </div>
+            </div>
+            <div id="otp-section" class="hidden mt-6">
+                <div class="space-y-6">
+                    <div>
+                        <label class="form-label">OTP</label>
+                        <input type="text" id="otp" placeholder="Enter OTP" class="w-full" style="padding: 10px;">
+                    </div>
+                    <button onclick="verifyOTP()" class="w-full" style=" background: rgba(59, 130, 246, 1); padding: 10px;">Verify OTP</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Section -->
+        <div id="profile" class="card max-w-md mx-auto hidden fade-in">
+            <h2>Your Profile</h2>
+            <div class="space-y-6">
+                <div class="flex justify-center">
+                    <img id="profile-picture" src="https://via.placeholder.com/150" alt="Profile Picture" class="w-28 h-28 rounded-full object-cover border-2 border-blue-500/50">
+                </div>
+                <input type="file" id="profile-picture-upload" accept="image/*" class="w-full" style="padding: 10px;">
+                <div>
+                    <label class="form-label">Name</label>
+                    <input type="text" id="profile-name" placeholder="Enter your name" class="w-full" style="padding: 10px;">
+                </div>
+                <div>
+                    <label class="form-label">Email</label>
+                    <input type="email" id="profile-email" placeholder="Email" class="w-full" readonly style="padding: 10px;">
+                </div>
+                <button onclick="updateProfile()" class="w-full" style=" background: rgba(59, 130, 246, 1); padding: 10px; ">Update Profile</button>
+            </div>
+        </div>
+
+        <!-- Dashboard (Main App) -->
+        <div id="app" class="hidden">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Add/Edit Expense -->
+                <div class="card flex-1 fade-in">
+                    <h2>Add Expense</h2>
+                    <form id="expense-form" class="space-y-6">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="form-label">Date</label>
+                                <input type="date" id="date" class="w-full" style="padding: 10px;">
+                            </div>
+                            <div>
+                                <label class="form-label">Category</label>
+                                <select id="category" class="w-full" style="padding: 10px;">
+                                    <option value="Food">Food</option>
+                                    <option value="Transport">Transport</option>
+                                    <option value="Entertainment">Entertainment</option>
+                                    <option value="Bills">Bills</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label">Amount</label>
+                                <input type="number" step="0.01" id="amount" placeholder="Enter amount" class="w-full" style="padding: 10px;">
+                            </div>
+                            <div>
+                                <label class="form-label">Description</label>
+                                <input type="text" id="description" placeholder="Enter description" class="w-full" style="padding: 10px;">
+                            </div>
+                        </div>
+                        <input type="hidden" id="expense-id" style="padding: 10px;">
+                        <button type="submit" class="w-full" style=" background: rgba(59, 130, 246, 1); padding: 10px;">Save Expense</button>
+                    </form>
+                </div>
+
+                <!-- Budget & GPay Sync -->
+                <div class="flex-1 space-y-6">
+                    <!-- Budget Setting -->
+                    <div class="card fade-in">
+                        <h2>Budget</h2>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div>
+                                <label class="form-label">Category</label>
+                                <select id="budget-category" class="w-full" style="padding: 10px;">
+                                    <option value="Food">Food</option>
+                                    <option value="Transport">Transport</option>
+                                    <option value="Entertainment">Entertainment</option>
+                                    <option value="Bills">Bills</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="form-label">Amount</label>
+                                <input type="number" step="0.01" id="budget" placeholder="Budget amount" class="w-full" style="padding: 10px;">
+                            </div>
+                            <div>
+                                <label class="form-label">Period</label>
+                                <select id="budget-period" class="w-full" style="padding: 10px;">
+                                    <option value="monthly">Monthly</option>
+                                    <option value="yearly">Yearly</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button onclick="setBudget()" class="w-full mt-6" style=" background: rgba(59, 130, 246, 1); padding: 10px;">Set Budget</button>
+                    </div>
+
+                    <!-- GPay Sync -->
+                    <div class="card fade-in">
+                        <h2>Sync GPay Transactions</h2>
+                        <input type="file" id="gpay-file" accept=".xlsx" class="mb-4 w-full" style="padding: 10px;">
+                        <button onclick="uploadGPay()" class="w-full" style=" background: rgba(59, 130, 246, 1); padding: 10px;">Upload GPay Data</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Expenses Section -->
+        <div id="expenses" class="card hidden fade-in">
+            <h2>Expenses</h2>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Category</th>
+                            <th>Amount</th>
+                            <th>Description</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expense-list"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Reports Section -->
+        <div id="reports" class="card hidden fade-in">
+            <h2>Reports</h2>
+            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 mb-6">
+                <div class="w-full sm:w-1/3">
+                    <label class="form-label">Period</label>
+                    <select id="report-period" class="w-full" style="padding: 10px;">
+                        <option value="day">Daily</option>
+                        <option value="week">Weekly</option>
+                        <option value="month">Monthly</option>
+                        <option value="year">Yearly</option>
+                    </select>
+                </div>
+                <button onclick="generateReport()" class="w-full sm:w-auto mt-6 sm:mt-0" style=" background: rgba(59, 130, 246, 1); padding: 10px;">Generate Report</button>
+            </div>
+            <div id="report-output" class="mb-6 text-sm text-gray-700 opacity-80"></div>
+            <canvas id="report-chart" class="max-w-full"></canvas>
+        </div>
+    </div>
+
+    <script>
+        let userEmail = '';
+        let chartInstance = null;
+
+        function showLogin() {
+            document.getElementById('login-form').classList.remove('hidden');
+            document.getElementById('register-form').classList.add('hidden');
+            document.getElementById('otp-section').classList.add('hidden');
+            document.getElementById('nav-links').classList.add('hidden');
+            document.getElementById('mobile-menu-toggle').classList.add('hidden');
+            document.getElementById('auth-section').classList.remove('hidden');
+        }
+
+        function showRegister() {
+            document.getElementById('register-form').classList.remove('hidden');
+            document.getElementById('login-form').classList.add('hidden');
+            document.getElementById('otp-section').classList.add('hidden');
+            document.getElementById('nav-links').classList.add('hidden');
+            document.getElementById('mobile-menu-toggle').classList.add('hidden');
+            document.getElementById('auth-section').classList.remove('hidden');
+        }
+
+        async function register() {
+            const email = document.getElementById('register-email').value;
+            const password = document.getElementById('register-password').value;
+            if (!email || !password) {
+                alert('Please enter email and password');
+                return;
+            }
+            try {
+                const response = await fetch('http://localhost:3000/api/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    userEmail = email;
+                    document.getElementById('register-form').classList.add('hidden');
+                    document.getElementById('otp-section').classList.remove('hidden');
+                    document.getElementById('nav-links').classList.add('hidden');
+                    document.getElementById('mobile-menu-toggle').classList.add('hidden');
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                console.error('Error in register:', error);
+                alert('Failed to register. Please check server connection.');
+            }
+        }
+
+        async function verifyOTP() {
+            const otp = document.getElementById('otp').value;
+            try {
+                const response = await fetch('http://localhost:3000/api/verify-otp', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: userEmail, otp })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    document.getElementById('auth-section').classList.add('hidden');
+                    document.getElementById('app').classList.remove('hidden');
+                    document.getElementById('nav-links').classList.remove('hidden');
+                    document.getElementById('mobile-menu-toggle').classList.remove('hidden');
+                    loadExpenses();
+                    loadProfile();
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                console.error('Error in verifyOTP:', error);
+                alert('Failed to verify OTP. Please check server connection.');
+            }
+        }
+
+        async function login() {
+            const email = document.getElementById('login-email').value;
+            const password = document.getElementById('login-password').value;
+            try {
+                const response = await fetch('http://localhost:3000/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await response.json();
+                if (data.success) {
+                    userEmail = email;
+                    document.getElementById('auth-section').classList.add('hidden');
+                    document.getElementById('app').classList.remove('hidden');
+                    document.getElementById('nav-links').classList.remove('hidden');
+                    document.getElementById('mobile-menu-toggle').classList.remove('hidden');
+                    loadExpenses();
+                    loadProfile();
+                } else {
+                    alert(data.message);
+                }
+            } catch (error) {
+                console.error('Error in login:', error);
+                alert('Failed to login. Please check server connection.');
+            }
+        }
+
+        async function loadProfile() {
+            try {
+                const response = await fetch(`http://localhost:3000/api/profile?email=${userEmail}`);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const profile = await response.json();
+                document.getElementById('profile-email').value = profile.email;
+                document.getElementById('profile-name').value = profile.name || '';
+                document.getElementById('profile-picture').src = profile.profile_picture || 'https://via.placeholder.com/150';
+            } catch (error) {
+                console.error('Error in loadProfile:', error);
+                alert('Failed to load profile. Please check server connection.');
+            }
+        }
+
+        async function updateProfile() {
+            const name = document.getElementById('profile-name').value;
+            const file = document.getElementById('profile-picture-upload').files[0];
+            let profilePicture = document.getElementById('profile-picture').src;
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = async (e) => {
+                    profilePicture = e.target.result;
+                    await saveProfile(name, profilePicture);
+                };
+                reader.readAsDataURL(file);
+            } else {
+                await saveProfile(name, profilePicture);
+            }
+        }
+
+        async function saveProfile(name, profilePicture) {
+            try {
+                const response = await fetch('http://localhost:3000/api/profile', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: userEmail, name, profile_picture: profilePicture })
+                });
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const data = await response.json();
+                alert(data.message);
+                loadProfile();
+            } catch (error) {
+                console.error('Error in saveProfile:', error);
+                alert('Failed to update profile. Please check server connection.');
+            }
+        }
+
+        async function setBudget() {
+            const category = document.getElementById('budget-category').value;
+            const budget = document.getElementById('budget').value;
+            const period = document.getElementById('budget-period').value;
+            if (!budget || budget <= 0) {
+                alert('Please enter a valid budget amount');
+                return;
+            }
+            try {
+                const response = await fetch('http://localhost:3000/api/set-budget', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: userEmail, category, amount: budget, period })
+                });
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const data = await response.json();
+                alert(data.message);
+            } catch (error) {
+                console.error('Error in setBudget:', error);
+                alert('Failed to set budget. Please check server connection.');
+            }
+        }
+
+        async function uploadGPay() {
+            const file = document.getElementById('gpay-file').files[0];
+            if (!file) {
+                alert('Please select a file');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = async (e) => {
+                try {
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array', cellDates: true });
+                    const sheet = workbook.Sheets[workbook.SheetNames[0]];
+                    const transactions = XLSX.utils.sheet_to_json(sheet, { raw: false, dateNF: 'dd/mm/yyyy' });
+                    const formattedTransactions = transactions.map(tnx => ({
+                        'Txn Date': tnx['Txn Date'] instanceof Date ? tnx['Txn Date'].toLocaleDateString('en-GB') : tnx['Txn Date'],
+                        'Debit Amount': tnx['Debit Amount'],
+                        'Credit Amount': tnx['Credit Amount'],
+                        'Balance': tnx['Balance']
+                    }));
+                    const response = await fetch('http://localhost:3000/api/import-gpay', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email: userEmail, transactions: formattedTransactions })
+                    });
+                    if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                    const result = await response.json();
+                    alert(result.message);
+                    loadExpenses();
+                } catch (error) {
+                    console.error('Error in uploadGPay:', error);
+                    alert('Failed to upload GPay data. Please check server connection.');
+                }
+            };
+            reader.readAsArrayBuffer(file);
+        }
+
+        async function loadExpenses() {
+            try {
+                const response = await fetch(`http://localhost:3000/api/expenses?email=${userEmail}`);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const expenses = await response.json();
+                const tbody = document.getElementById('expense-list');
+                tbody.innerHTML = '';
+                expenses.forEach(exp => {
+                    const tr = document.createElement('tr');
+                    tr.innerHTML = `
+                        <td>${exp.date}</td>
+                        <td>${exp.category}</td>
+                        <td>${exp.amount}</td>
+                        <td>${exp.description}</td>
+                        <td>
+                            <button onclick="editExpense(${exp.id})" class="bg-blue-500 text-white p-2 rounded mr-2 hover:bg-blue-600">Edit</button>
+                            <button onclick="deleteExpense(${exp.id})" class="bg-red-500 text-white p-2 rounded hover:bg-red-600">Delete</button>
+                        </td>`;
+                    tbody.appendChild(tr);
+                });
+            } catch (error) {
+                console.error('Error in loadExpenses:', error);
+                alert('Failed to load expenses. Please check server connection.');
+            }
+        }
+
+        async function editExpense(id) {
+            try {
+                const response = await fetch(`http://localhost:3000/api/expense/${id}?email=${userEmail}`);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const exp = await response.json();
+                document.getElementById('expense-id').value = exp.id;
+                document.getElementById('date').value = exp.date;
+                document.getElementById('category').value = exp.category;
+                document.getElementById('amount').value = exp.amount;
+                document.getElementById('description').value = exp.description;
+                showSection('app');
+            } catch (error) {
+                console.error('Error in editExpense:', error);
+                alert('Failed to load expenses. Please check server connection.');
+            }
+        }
+
+        async function deleteExpense(id) {
+            try {
+                const response = await fetch(`http://localhost:3000/api/expense/${id}?email=${userEmail}`, { method: 'DELETE' });
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const data = await response.json();
+                alert(data.message);
+                loadExpenses();
+            } catch (error) {
+                console.error('Error in deleteExpense:', error);
+                alert('Failed to delete expense. Please check server connection.');
+            }
+        }
+
+        document.getElementById('expense-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const expense = {
+                id: document.getElementById('expense-id').value,
+                date: document.getElementById('date').value,
+                category: document.getElementById('category').value,
+                amount: document.getElementById('amount').value,
+                description: document.getElementById('description').value,
+                email: userEmail
+            };
+            try {
+                const response = await fetch('http://localhost:3000/api/expense', {
+                    method: expense.id ? 'PUT' : 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(expense)
+                });
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const data = await response.json();
+                alert(data.message);
+                document.getElementById('expense-form').reset();
+                document.getElementById('expense-id').value = '';
+                loadExpenses();
+            } catch (error) {
+                console.error('Error in expense-form submit:', error);
+                alert('Failed to save expense. Please check server connection.');
+            }
+        });
+
+        async function generateReport() {
+            const period = document.getElementById('report-period').value;
+            try {
+                const response = await fetch(`http://localhost:3000/api/report?email=${userEmail}&period=${period}`);
+                if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+                const report = await response.json();
+                if (!report.total && !report.byCategory && !report.chartData) {
+                    throw new Error('No data available for the selected period');
+                }
+                const output = document.getElementById('report-output');
+                output.innerHTML = `
+                    <h3 class="text-base font-semibold text-gray-800 opacity-90">${period.charAt(0).toUpperCase() + period.slice(1)} Report</h3>
+                    <p class="text-gray-700 opacity-80">Total: ${report.total.toFixed(2)}</p>
+                    <ul class="list-disc pl-5 text-gray-700 opacity-80">${Object.entries(report.byCategory).map(([cat, amt]) => `<li>${cat}: ${amt.toFixed(2)}</li>`).join('')}</ul>
+                `;
+                if (chartInstance) chartInstance.destroy();
+                const ctx = document.getElementById('report-chart').getContext('2d');
+                chartInstance = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: report.chartData.map(item => item.category),
+                        datasets: [{
+                            label: 'Expenses',
+                            data: report.chartData.map(item => item.total),
+                            backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                            borderColor: 'rgba(59, 130, 246, 0.8)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: { beginAtZero: true, ticks: { color: '#2D3748', font: { size: 12 }, opacity: 0.8 } },
+                            x: { ticks: { color: '#2D3748', font: { size: 12 }, opacity: 0.8 } }
+                        },
+                        plugins: {
+                            legend: { display: false },
+                            title: { display: true, text: `${period.charAt(0).toUpperCase() + period.slice(1)} Expenses`, color: '#2D3748', font: { size: 16, weight: '600' }, opacity: 0.9 }
+                        }
+                    }
+                });
+            } catch (error) {
+                console.error('Error in generateReport:', error);
+                alert('Failed to generate report. No expenses found for the selected period or server connection issue.');
+            }
+        }
+
+        function showSection(sectionId) {
+            document.getElementById('app').classList.add('hidden');
+            document.getElementById('expenses').classList.add('hidden');
+            document.getElementById('reports').classList.add('hidden');
+            document.getElementById('profile').classList.add('hidden');
+            document.getElementById(sectionId).classList.remove('hidden');
+            document.getElementById('nav-links').classList.remove('hidden');
+            document.getElementById('mobile-menu-toggle').classList.remove('hidden');
+            if (sectionId === 'expenses') {
+                loadExpenses();
+            } else if (sectionId === 'reports') {
+                generateReport();
+            }
+            document.querySelectorAll('.nav-links a').forEach(link => link.classList.remove('active'));
+            document.querySelector(`.nav-links a[href="#${sectionId}"]`).classList.add('active');
+            if (window.innerWidth <= 768) {
+                toggleNav();
+            }
+        }
+
+        function toggleNav() {
+            const navLinks = document.getElementById('nav-links');
+            navLinks.classList.toggle('active');
+        }
+
+        function logout() {
+            userEmail = '';
+            document.getElementById('auth-section').classList.remove('hidden');
+            document.getElementById('app').classList.add('hidden');
+            document.getElementById('expenses').classList.add('hidden');
+            document.getElementById('reports').classList.add('hidden');
+            document.getElementById('profile').classList.add('hidden');
+            document.getElementById('nav-links').classList.add('hidden');
+            document.getElementById('mobile-menu-toggle').classList.add('hidden');
+            document.getElementById('login-email').value = '';
+            document.getElementById('login-password').value = '';
+            document.getElementById('register-email').value = '';
+            document.getElementById('register-password').value = '';
+            document.getElementById('otp').value = '';
+            showLogin();
+        }
+
+        // Initialize the app with the login page
+        showLogin();
+    </script>
+</body>
+</html>
