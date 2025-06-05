@@ -41,3 +41,17 @@ arduino
 Copy
 Edit
 http://localhost:3000
+
+---
+
+# 🗂 Project Structure
+Expense_tracker/
+├── public/           # Frontend HTML, CSS, JS files
+├── server.js         # App entry point
+├── package.json      # Project metadata
+└── README.md         # You're here
+
+---
+
+👨‍💻 Author
+Made with ❤️ by AbiVarsan
