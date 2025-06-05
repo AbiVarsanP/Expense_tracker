@@ -53,5 +53,5 @@ Expense_tracker/
 
 ---
 
-👨‍💻 Author
+# 👨‍💻 Author
 Made with ❤️ by AbiVarsan
