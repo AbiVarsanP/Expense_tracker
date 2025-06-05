@@ -44,7 +44,7 @@ http://localhost:3000
 
 ---
 
-# 🗂 Project Structure
+## 🗂 Project Structure
 Expense_tracker/
 ├── public/           # Frontend HTML, CSS, JS files
 ├── server.js         # App entry point
@@ -53,5 +53,5 @@ Expense_tracker/
 
 ---
 
-# 👨‍💻 Author
+## 👨‍💻 Author
 Made with ❤️ by AbiVarsan
