@@ -33,3 +33,11 @@ Start the server with:
 
 ```bash
 npm start
+
+```
+Then open your browser and go to:
+
+arduino
+Copy
+Edit
+http://localhost:3000
