@@ -1,35 +1,35 @@
-💸 Expense Tracker
-A full-stack Expense Tracker System built using HTML, Node.js, and MySQL. This web app allows users to manage their personal finances by tracking expenses, setting budgets, and generating detailed reports. It also includes support for syncing Google Pay transactions via CSV upload.
+# 💸 Expense Tracker
 
-🔧 Technologies Used
-Frontend: HTML, CSS, JavaScript
+A full-stack **Expense Tracker System** built using **HTML**, **Node.js**, and **MySQL**. This web app allows users to manage personal finances by tracking expenses, setting budgets, and generating detailed reports. It also supports syncing Google Pay transactions via CSV upload.
 
-Backend: Node.js with Express
+---
 
-Database: MySQL
+## 🚀 Features
 
-Additional: CSV Parsing, File Uploads, GPay Transaction Sync
+- 👤 User registration and login  
+- ➕ Add expenses with date, category, and amount  
+- ❌ Delete expenses anytime  
+- 🎯 Set monthly budget limits  
+- 📊 Generate summary reports of spending  
+- 🔄 Sync expenses using GPay transaction CSVs  
+- 💡 Simple and clean user interface
 
-🎯 Features
-User account creation and secure login system
+---
 
-Add and delete expenses by date and category
+## 🛠 Tech Stack
 
-Set monthly budget limits and track progress
+| Layer     | Technology         |
+|-----------|--------------------|
+| Frontend  | HTML, CSS, JavaScript |
+| Backend   | Node.js (Express)  |
+| Database  | MySQL              |
+| Extras    | CSV Parsing, File Uploads |
 
-Generate summary reports for spending trends
+---
 
-Sync transactions from GPay CSV files
+## ⚙️ Getting Started
 
-Simple, intuitive interface with clean layout
+Start the server with:
 
-⚙️ Usage
-Start the system using:
-
-bash
-Copy
-Edit
+```bash
 npm start
-Access the application on http://localhost:3000
-
-Users can register, log in, and begin managing their expenses directly from the browser. Uploaded GPay transaction files are automatically parsed and converted into expense entries for seamless integration.
